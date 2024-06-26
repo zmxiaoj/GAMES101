@@ -21,14 +21,14 @@ int main(){
     Eigen::Vector3f w(1.0f,0.0f,0.0f);
     // vector output
     std::cout << "Example of output \n";
-    std::cout << v << std::endl;
+    std::cout << v.transpose() << std::endl;
     // vector add
     std::cout << "Example of add \n";
-    std::cout << v + w << std::endl;
+    std::cout << (v + w).transpose() << std::endl;
     // vector scalar multiply
     std::cout << "Example of scalar multiply \n";
-    std::cout << v * 3.0f << std::endl;
-    std::cout << 2.0f * v << std::endl;
+    std::cout << v.transpose() * 3.0f << std::endl;
+    std::cout << 2.0f * v.transpose() << std::endl;
 
     // Example of matrix
     std::cout << "Example of matrix \n";
@@ -40,9 +40,17 @@ int main(){
     std::cout << "Example of output \n";
     std::cout << i << std::endl;
     // matrix add i + j
+    std::cout << "Example of i add j\n";
+    std::cout << i + j << std::endl;
     // matrix scalar multiply i * 2.0
+    std::cout << "Example of i multiply 2.0\n";
+    std::cout << 2 * i << std::endl;
     // matrix multiply i * j
+    std::cout << "Example of i multiply j\n";
+    std::cout << i * j << std::endl;
     // matrix multiply vector i * v
+    std::cout << "Example of i multiply v\n";
+    std::cout << i * v << std::endl;
 
     return 0;
 }
