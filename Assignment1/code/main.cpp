@@ -19,15 +19,20 @@ Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
     return view;
 }
 
-Eigen::Matrix4f get_model_matrix(float rotation_angle)
+Eigen::Matrix4f get_model_matrix(Eigen::Vector3f rotation_angle)
 {
-    Eigen::Matrix4f model = Eigen::Matrix4f::Identity();
+    // Eigen::Matrix4f model = Eigen::Matrix4f::Identity();
 
     // TODO: Implement this function
     // Create the model matrix for rotating the triangle around the Z axis.
     // Then return it.
 
-    return model;
+    Eigen::Isometry3f model = Eigen::Isometry3f::Identity();
+    model.rotate(Eigen::AngleAxisf(rotation_angle.z() / 180.0 * MY_PI, Eigen::Vector3f::UnitZ()));
+    model.rotate(Eigen::AngleAxisf(rotation_angle.y() / 180.0 * MY_PI, Eigen::Vector3f::UnitY()));
+    model.rotate(Eigen::AngleAxisf(rotation_angle.x() / 180.0 * MY_PI, Eigen::Vector3f::UnitX()));
+
+    return model.matrix();
 }
 
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
@@ -40,21 +45,35 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
     // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
+    float n = -zNear;
+    float f = -zFar;
+    float t = zNear * tan(eye_fov / 2.0 / 180.0 * MY_PI);
+    float r = t * aspect_ratio;
+
+    projection.coeffRef(0, 0) = n / r;
+    projection.coeffRef(1, 1) = n / t;
+    projection.coeffRef(2, 2) = (f + n) / (n - f);
+    projection.coeffRef(2, 3) = -2 * f * n / (n - f);
+    projection.coeffRef(3, 2) = 1;
+    projection.coeffRef(3, 3) = 0;
+
 
     return projection;
 }
 
 int main(int argc, const char** argv)
 {
-    float angle = 0;
+    Eigen::Vector3f angle = {0, 0, 0};
     bool command_line = false;
     std::string filename = "output.png";
 
     if (argc >= 3) {
         command_line = true;
-        angle = std::stof(argv[2]); // -r by default
-        if (argc == 4) {
-            filename = std::string(argv[3]);
+        angle.x() = std::stof(argv[2]); // -r by default
+        angle.y() = std::stof(argv[3]); 
+        angle.z() = std::stof(argv[4]); 
+        if (argc == 6) {
+            filename = std::string(argv[5]);
         }
         else
             return 0;
@@ -90,7 +109,10 @@ int main(int argc, const char** argv)
         return 0;
     }
 
+    // 0-x 1-y 2-z
+    int angle_flag = 2;
     while (key != 27) {
+        
         r.clear(rst::Buffers::Color | rst::Buffers::Depth);
 
         r.set_model(get_model_matrix(angle));
@@ -106,11 +128,24 @@ int main(int argc, const char** argv)
 
         std::cout << "frame count: " << frame_count++ << '\n';
 
+        if (key == 'x')
+        {
+            angle_flag = 0;
+        }
+        else if (key == 'y')
+        {
+            angle_flag = 1;
+        }
+        else if (key == 'z')
+        {
+            angle_flag = 2;
+        }
+
         if (key == 'a') {
-            angle += 10;
+            angle[angle_flag] += 5;
         }
         else if (key == 'd') {
-            angle -= 10;
+            angle[angle_flag] -= 5;
         }
     }
 

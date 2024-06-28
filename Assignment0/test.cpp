@@ -6,9 +6,9 @@
 int main()
 {
     Eigen::Vector3d p(2, 1, 1);
-    std::cout << "p: \n" << p << std::endl;
+    std::cout << "p: \n" << p.transpose() << std::endl;
     Eigen::Vector3d p1{2, 1, 1};
-    std::cout << "p1: \n" << p1 << std::endl;
+    std::cout << "p1: \n" << p1.transpose() << std::endl;
     Eigen::Isometry2d T = Eigen::Isometry2d::Identity();
 
     Eigen::Rotation2D<double> rot(M_PI/4);

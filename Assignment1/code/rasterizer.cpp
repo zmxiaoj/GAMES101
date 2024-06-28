@@ -45,14 +45,17 @@ void rst::rasterizer::draw_line(Eigen::Vector3f begin, Eigen::Vector3f end)
     px=2*dy1-dx1;
     py=2*dx1-dy1;
 
+    // 直线斜率绝对值小于1
     if(dy1<=dx1)
     {
+        // 直线斜率大于0，从起点画到终点
         if(dx>=0)
         {
             x=x1;
             y=y1;
             xe=x2;
         }
+        // 直线斜率小于0，从终点画到起点
         else
         {
             x=x2;
@@ -61,6 +64,7 @@ void rst::rasterizer::draw_line(Eigen::Vector3f begin, Eigen::Vector3f end)
         }
         Eigen::Vector3f point = Eigen::Vector3f(x, y, 1.0f);
         set_pixel(point,line_color);
+        // 按照x的增量，逐个像素点画直线
         for(i=0;x<xe;i++)
         {
             x=x+1;
@@ -85,6 +89,7 @@ void rst::rasterizer::draw_line(Eigen::Vector3f begin, Eigen::Vector3f end)
             set_pixel(point,line_color);
         }
     }
+    // 直线斜率绝对值大于1
     else
     {
         if(dy>=0)
@@ -229,9 +234,12 @@ int rst::rasterizer::get_index(int x, int y)
 void rst::rasterizer::set_pixel(const Eigen::Vector3f& point, const Eigen::Vector3f& color)
 {
     //old index: auto ind = point.y() + point.x() * width;
+    // 检查像素点是否合法
     if (point.x() < 0 || point.x() >= width ||
         point.y() < 0 || point.y() >= height) return;
+    // 获取像素点的索引
     auto ind = (height-point.y())*width + point.x();
+    // 设置像素点的颜色
     frame_buf[ind] = color;
 }
 

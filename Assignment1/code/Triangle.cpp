@@ -41,6 +41,11 @@ void Triangle::setTexCoord(int ind, float s, float t)
     tex_coords[ind] = Vector2f(s, t);
 }
 
+/**
+ * @brief 将三角形三个顶点坐标转换为齐次坐标
+ * 
+ * @return std::array<Vector4f, 3> 
+ */
 std::array<Vector4f, 3> Triangle::toVector4() const
 {
     std::array<Vector4f, 3> res;
