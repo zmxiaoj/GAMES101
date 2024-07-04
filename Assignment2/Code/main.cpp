@@ -31,7 +31,21 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float zNear, float zFar)
 {
     // TODO: Copy-paste your implementation from the previous assignment.
+    // Copy from assignment1/code/main.cpp
     Eigen::Matrix4f projection;
+
+    float n = -zNear;
+    float f = -zFar;
+    float t = zNear * tan(eye_fov / 2.0 / 180.0 * MY_PI);
+    float r = t * aspect_ratio;
+
+    projection.coeffRef(0, 0) = n / r;
+    projection.coeffRef(1, 1) = n / t;
+    projection.coeffRef(2, 2) = (f + n) / (n - f);
+    projection.coeffRef(2, 3) = -2 * f * n / (n - f);
+    projection.coeffRef(3, 2) = 1;
+    projection.coeffRef(3, 3) = 0;
+
 
     return projection;
 }
@@ -88,6 +102,7 @@ int main(int argc, const char** argv)
 
     if (command_line)
     {
+        // 初始化color buffer和z buffer
         r.clear(rst::Buffers::Color | rst::Buffers::Depth);
 
         r.set_model(get_model_matrix(angle));
