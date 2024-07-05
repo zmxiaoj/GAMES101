@@ -186,6 +186,8 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t) {
                     depth_buf[get_index(i, j)] = z_interpolated;
                     col_buf[get_index(i, j)].push_back(t.getColor());
                 }
+                Eigen::Vector3f p{i, j, 1.0f};
+                set_pixel(p, t.getColor());
             }
         }
     }

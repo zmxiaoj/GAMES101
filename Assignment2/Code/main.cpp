@@ -137,7 +137,7 @@ int main(int argc, const char** argv)
 
         std::cout << "frame count: " << frame_count++ << '\n';
     }
-
+    
     return 0;
 }
 // clang-format on
