@@ -32,18 +32,31 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float z
 {
     // TODO: Copy-paste your implementation from the previous assignment.
     // Copy from assignment1/code/main.cpp
-    Eigen::Matrix4f projection;
+    Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
 
-    float n = -zNear;
-    float f = -zFar;
+    // orignal code cause wrong z distance
+    // float n = -zNear;
+    // float f = -zFar;
+    // float t = zNear * tan(eye_fov / 2.0 / 180.0 * MY_PI);
+    // float r = t * aspect_ratio;
+
+    // projection.coeffRef(0, 0) = n / r;
+    // projection.coeffRef(1, 1) = n / t;
+    // projection.coeffRef(2, 2) = (f + n) / (n - f);
+    // projection.coeffRef(2, 3) = -2 * f * n / (n - f);
+    // projection.coeffRef(3, 2) = 1;
+    // projection.coeffRef(3, 3) = 0;
+
+    float n = zNear;
+    float f = zFar;
     float t = zNear * tan(eye_fov / 2.0 / 180.0 * MY_PI);
     float r = t * aspect_ratio;
 
     projection.coeffRef(0, 0) = n / r;
     projection.coeffRef(1, 1) = n / t;
     projection.coeffRef(2, 2) = (f + n) / (n - f);
-    projection.coeffRef(2, 3) = -2 * f * n / (n - f);
-    projection.coeffRef(3, 2) = 1;
+    projection.coeffRef(2, 3) = 2 * f * n / (n - f);
+    projection.coeffRef(3, 2) = -1;
     projection.coeffRef(3, 3) = 0;
 
 

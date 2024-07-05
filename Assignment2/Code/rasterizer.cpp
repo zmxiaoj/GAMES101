@@ -40,7 +40,7 @@ auto to_vec4(const Eigen::Vector3f& v3, float w = 1.0f)
 }
 
 
-static bool insideTriangle(int x, int y, const Vector4f* _v)
+static bool insideTriangle(float x, float y, const Vector4f* _v)
 {   
     // TODO : Implement this function to check if the point (x, y) is inside the triangle represented by _v[0], _v[1], _v[2]
     float px = x, py = y,
@@ -166,29 +166,31 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t) {
         y_min = (int)floor(y_minf - 0.5f),
         x_max = (int)ceil(x_maxf + 0.5f),
         y_max = (int)ceil(y_maxf + 0.5f);
+    std::cout << " x_min: " << x_min 
+              << " x_max: " << x_max 
+              << " y_min: " << y_min 
+              << " y_max: " << y_max << std::endl;
     // Step2: Traverse pixels in bounding box and determine if pixel is inside triangle
-    for (int i = x_min; i < x_max; i++)
+    for (int x = x_min; x < x_max; x++)
     {
-        for (int j = y_min; j < y_max; j++)
+        for (int y = y_min; y < y_max; y++)
         {
-            if (insideTriangle(i, j, v.data()))
+            if (insideTriangle(static_cast<float>(x + 0.5f),static_cast<float>(y + 0.5f), v.data()))
             {
                 // Step3: If pixel is inside triangle, calculate z value using barycentric coordinates
                 //        If z value is less than the value in the depth buffer, update the depth buffer and set the pixel color
-                auto[alpha, beta, gamma] = computeBarycentric2D(i, j, t.v);
+                auto[alpha, beta, gamma] = computeBarycentric2D(x, y, t.v);
                 float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
                 float z_interpolated = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
                 z_interpolated *= w_reciprocal;
                 
-                // -z轴方向，深度渲染时，z值越大，越靠近屏幕
-                if (z_interpolated > depth_buf[get_index(i, j)])
+                if (z_interpolated < depth_buf[get_index(x, y)])
                 {
                     // Step4: Interpolate color using barycentric coordinates and set the pixel color
-                    depth_buf[get_index(i, j)] = z_interpolated;
-                    col_buf[get_index(i, j)].push_back(t.getColor());
+                    depth_buf[get_index(x, y)] = z_interpolated;
+                    Eigen::Vector3f p{x, y, 1.0f};
+                    set_pixel(p, t.getColor());
                 }
-                Eigen::Vector3f p{i, j, 1.0f};
-                set_pixel(p, t.getColor());
             }
         }
     }
