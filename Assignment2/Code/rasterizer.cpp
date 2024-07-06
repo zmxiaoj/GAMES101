@@ -56,6 +56,7 @@ static bool insideTriangle(float x, float y, const Vector4f* _v)
         float epsilon = 1e-7;
         Eigen::Vector2f v21 = v2 - v1, v31 = v3 - v1;
         float cross = v21.x() * v31.y() - v31.x() * v21.y();
+        // Eigen::Vector2f cross = v21.cross(v31);
         if (cross > epsilon) return 1;
         else if (cross < -epsilon) return -1;
         else return 0;
