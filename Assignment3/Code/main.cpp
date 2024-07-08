@@ -101,7 +101,7 @@ Eigen::Vector3f texture_fragment_shader(const fragment_shader_payload& payload)
     if (payload.texture)
     {
         // TODO: Get the texture value at the texture coordinates of the current fragment
-
+        return_color = payload.texture->getColor(payload.tex_coords.x(), payload.tex_coords.y());
     }
     Eigen::Vector3f texture_color;
     texture_color << return_color.x(), return_color.y(), return_color.z();
@@ -130,6 +130,23 @@ Eigen::Vector3f texture_fragment_shader(const fragment_shader_payload& payload)
         // TODO: For each light source in the code, calculate what the *ambient*, *diffuse*, and *specular* 
         // components are. Then, accumulate that result on the *result_color* object.
 
+        // Copy from phong_fragment_shader()
+        Eigen::Vector3f light_dis = (light.position - point);
+        Eigen::Vector3f view_dir = (eye_pos - point).normalized();
+        // 注意r2的计算，点到光源的距离的平方
+        float r2 = light_dis.squaredNorm();
+        Eigen::Vector3f light_dir = light_dis.normalized();
+        // ambient
+        Eigen::Vector3f ambient = ka.cwiseProduct(amb_light_intensity);
+        
+        // diffuse
+        Eigen::Vector3f diffuse = kd.cwiseProduct(light.intensity / r2) * std::max(0.f, normal.dot(light_dir));
+        
+        // specular
+        Eigen::Vector3f h = (light_dir + view_dir).normalized();
+        Eigen::Vector3f specular = ks.cwiseProduct(light.intensity / r2) * std::pow(std::max(0.f, normal.dot(h)), p);
+    
+        result_color += ambient + diffuse + specular;
     }
 
     return result_color * 255.f;
@@ -160,18 +177,18 @@ Eigen::Vector3f phong_fragment_shader(const fragment_shader_payload& payload)
         // TODO: For each light source in the code, calculate what the *ambient*, *diffuse*, and *specular* 
         // components are. Then, accumulate that result on the *result_color* object.
         
-        Eigen::Vector3f light_dir = (light.position - point);
+        Eigen::Vector3f light_dis = (light.position - point);
         Eigen::Vector3f view_dir = (eye_pos - point).normalized();
         // 注意r2的计算，点到光源的距离的平方
-        float r2 = light_dir.dot(light_dir);
-        light_dir.normalize();
+        float r2 = light_dis.squaredNorm();
+        Eigen::Vector3f light_dir = light_dis.normalized();
         // ambient
         Eigen::Vector3f ambient = ka.cwiseProduct(amb_light_intensity);
+        
         // diffuse
-        
         Eigen::Vector3f diffuse = kd.cwiseProduct(light.intensity / r2) * std::max(0.f, normal.dot(light_dir));
-        // specular
         
+        // specular
         Eigen::Vector3f h = (light_dir + view_dir).normalized();
         Eigen::Vector3f specular = ks.cwiseProduct(light.intensity / r2) * std::pow(std::max(0.f, normal.dot(h)), p);
     
@@ -301,8 +318,8 @@ int main(int argc, const char** argv)
 
     rst::rasterizer r(700, 700);
 
-    auto texture_path = "hmap.jpg";
-    r.set_texture(Texture(obj_path + texture_path));
+    auto texture_tex = "spot_texture.png";
+    r.set_texture(Texture(obj_path + texture_tex));
 
     std::function<Eigen::Vector3f(fragment_shader_payload)> active_shader = phong_fragment_shader;
 
@@ -315,8 +332,9 @@ int main(int argc, const char** argv)
         {
             std::cout << "Rasterizing using the texture shader\n";
             active_shader = texture_fragment_shader;
-            texture_path = "spot_texture.png";
-            r.set_texture(Texture(obj_path + texture_path));
+            std::cout << "Texture path: " << obj_path + texture_tex << std::endl;
+            // 必须执行这一步，否则会报错
+            r.set_texture(Texture(obj_path + texture_tex));
         }
         else if (argc == 3 && std::string(argv[2]) == "normal")
         {
