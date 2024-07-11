@@ -101,7 +101,8 @@ Eigen::Vector3f texture_fragment_shader(const fragment_shader_payload& payload)
     if (payload.texture)
     {
         // TODO: Get the texture value at the texture coordinates of the current fragment
-        return_color = payload.texture->getColor(payload.tex_coords.x(), payload.tex_coords.y());
+        // return_color = payload.texture->getColor(payload.tex_coords.x(), payload.tex_coords.y());
+        return_color = payload.texture->getColorBilinear(payload.tex_coords.x(), payload.tex_coords.y());
     }
     Eigen::Vector3f texture_color;
     texture_color << return_color.x(), return_color.y(), return_color.z();
@@ -384,8 +385,8 @@ int main(int argc, const char** argv)
 
     rst::rasterizer r(700, 700);
 
-    auto texture_tex = "hmap.jpg";
-    // auto texture_tex = "rock.png";
+    // 修改为spot_texture.png 否则./Rasterizer save_texture.png texture会报错
+    auto texture_tex = "spot_texture.png";
     r.set_texture(Texture(obj_path + texture_tex));
 
     std::function<Eigen::Vector3f(fragment_shader_payload)> active_shader = phong_fragment_shader;
