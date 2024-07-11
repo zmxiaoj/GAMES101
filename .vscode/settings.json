@@ -72,7 +72,11 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "csignal": "cpp",
+        "codecvt": "cpp",
+        "future": "cpp",
+        "valarray": "cpp"
     },
     "commentTranslate.targetLanguage": "zh-CN"
 }
