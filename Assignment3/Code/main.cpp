@@ -362,8 +362,10 @@ int main(int argc, const char** argv)
     std::string filename = "output.png";
     objl::Loader Loader;
     std::string obj_path = "/home/zmxj/code/GAMES101/Assignment3/Code/models/spot/";
+    // std::string obj_path = "/home/zmxj/code/GAMES101/Assignment3/Code/models/rock/";
 
     // Load .obj File
+    // bool loadout = Loader.LoadFile("/home/zmxj/code/GAMES101/Assignment3/Code/models/rock/rock.obj");
     bool loadout = Loader.LoadFile("/home/zmxj/code/GAMES101/Assignment3/Code/models/spot/spot_triangulated_good.obj");
     for(auto mesh:Loader.LoadedMeshes)
     {
@@ -383,6 +385,7 @@ int main(int argc, const char** argv)
     rst::rasterizer r(700, 700);
 
     auto texture_tex = "hmap.jpg";
+    // auto texture_tex = "rock.png";
     r.set_texture(Texture(obj_path + texture_tex));
 
     std::function<Eigen::Vector3f(fragment_shader_payload)> active_shader = phong_fragment_shader;
@@ -397,6 +400,7 @@ int main(int argc, const char** argv)
             std::cout << "Rasterizing using the texture shader\n";
             active_shader = texture_fragment_shader;
             texture_tex = "spot_texture.png";
+            // texture_tex = "rock.png";
             std::cout << "Texture path: " << obj_path + texture_tex << std::endl;
             // 必须执行这一步，否则会报错
             r.set_texture(Texture(obj_path + texture_tex));
@@ -429,7 +433,7 @@ int main(int argc, const char** argv)
         }
     }
 
-    Eigen::Vector3f eye_pos = {0,0,10};
+    Eigen::Vector3f eye_pos = {0, 0, 10};
 
     r.set_vertex_shader(vertex_shader);
     r.set_fragment_shader(active_shader);
