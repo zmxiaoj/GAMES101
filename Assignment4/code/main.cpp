@@ -66,7 +66,14 @@ void bezier(const std::vector<cv::Point2f> &control_points, cv::Mat &window)
     for (double t = 0.0; t <= 1.0; t += 0.001) 
     {
         auto point = recursive_bezier(control_points, t);
-        window.at<cv::Vec3b>(point.y, point.x)[0] = 255;
+        // 
+        int x = static_cast<int>(point.x),
+            y = static_cast<int>(point.y);
+        float dx = point.x - x,
+              dy = point.y - y;
+        // 通过dx dy计算到达像素中心的距离，作为颜色的权重
+        float factor = std::max(1.0f - sqrt(pow(((dx - 0.5f) / 0.5f), 2) + pow(((dy - 0.5) / 0.5f), 2)), 0.5);
+        window.at<cv::Vec3b>(y, x)[1] = (int)(255 * factor);
     }
 
 }
@@ -94,7 +101,8 @@ int main(int argc, char **argv)
 
         if (control_points.size() == num_control_points) 
         {
-            // naive_bezier(control_points, window);
+            naive_bezier(control_points, window);
+            cv::imwrite("naive_bezier_curve_" + std::to_string(num_control_points) + ".png", window);
             bezier(control_points, window);
 
             cv::imshow("Bezier Curve", window);
