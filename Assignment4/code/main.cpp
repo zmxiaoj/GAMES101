@@ -3,10 +3,20 @@
 #include <opencv2/opencv.hpp>
 
 std::vector<cv::Point2f> control_points;
+int num_control_points = 4;
 
+/**
+ * @brief 鼠标的callback函数 选择控制点
+ * 
+ * @param event 
+ * @param x 
+ * @param y 
+ * @param flags 
+ * @param userdata 
+ */
 void mouse_handler(int event, int x, int y, int flags, void *userdata) 
 {
-    if (event == cv::EVENT_LBUTTONDOWN && control_points.size() < 4) 
+    if (event == cv::EVENT_LBUTTONDOWN && control_points.size() < num_control_points) 
     {
         std::cout << "Left button of the mouse is clicked - position (" << x << ", "
         << y << ")" << '\n';
@@ -14,6 +24,12 @@ void mouse_handler(int event, int x, int y, int flags, void *userdata)
     }     
 }
 
+/**
+ * @brief 使用4个控制点的解析表达式绘制贝塞尔曲线
+ * 
+ * @param points 
+ * @param window 
+ */
 void naive_bezier(const std::vector<cv::Point2f> &points, cv::Mat &window) 
 {
     auto &p_0 = points[0];
@@ -33,19 +49,35 @@ void naive_bezier(const std::vector<cv::Point2f> &points, cv::Mat &window)
 cv::Point2f recursive_bezier(const std::vector<cv::Point2f> &control_points, float t) 
 {
     // TODO: Implement de Casteljau's algorithm
-    return cv::Point2f();
-
+    // 深拷贝control_points 
+    std::vector<cv::Point2f> tmp_points = control_points;
+    while (tmp_points.size() > 1) {
+        for (int i = 0; i < tmp_points.size() - 1; i++) 
+            tmp_points[i] = (1 - t) * tmp_points[i] + t * tmp_points[i + 1];
+        tmp_points.pop_back();
+    }
+    return tmp_points.front();
 }
 
 void bezier(const std::vector<cv::Point2f> &control_points, cv::Mat &window) 
 {
     // TODO: Iterate through all t = 0 to t = 1 with small steps, and call de Casteljau's 
     // recursive Bezier algorithm.
+    for (double t = 0.0; t <= 1.0; t += 0.001) 
+    {
+        auto point = recursive_bezier(control_points, t);
+        window.at<cv::Vec3b>(point.y, point.x)[0] = 255;
+    }
 
 }
 
-int main() 
+int main(int argc, char **argv) 
 {
+    // 根据命令行读入参数设定控制点数目
+    if (argc == 2) 
+        num_control_points = std::stoi(argv[1]);
+    std::cout << "Number of control points: " << num_control_points << std::endl;
+ 
     cv::Mat window = cv::Mat(700, 700, CV_8UC3, cv::Scalar(0));
     cv::cvtColor(window, window, cv::COLOR_BGR2RGB);
     cv::namedWindow("Bezier Curve", cv::WINDOW_AUTOSIZE);
@@ -60,13 +92,14 @@ int main()
             cv::circle(window, point, 3, {255, 255, 255}, 3);
         }
 
-        if (control_points.size() == 4) 
+        if (control_points.size() == num_control_points) 
         {
-            naive_bezier(control_points, window);
-            //   bezier(control_points, window);
+            // naive_bezier(control_points, window);
+            bezier(control_points, window);
 
             cv::imshow("Bezier Curve", window);
-            cv::imwrite("my_bezier_curve.png", window);
+            // 将num_control_points转化为string作为图像后缀
+            cv::imwrite("my_bezier_curve_" + std::to_string(num_control_points) + ".png", window);
             key = cv::waitKey(0);
 
             return 0;
@@ -76,5 +109,5 @@ int main()
         key = cv::waitKey(20);
     }
 
-return 0;
+    return 0;
 }
